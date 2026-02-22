@@ -1,0 +1,39 @@
+{% extends "shop/base.html" %}
+
+{% block title %}<title>Insaffood - Home</title>{% endblock %}
+
+{% block content %}
+
+<h1>All Products</h1>
+<div class="all-products">
+  {% if products %}
+  {% for product in products %}
+
+  {% if product.link %}
+  <form method="post" action="{% url 'add_to_cart' product.id %}">
+    {% csrf_token %}
+
+    <div class="product-card">
+      <a href="{% url 'product_detail' product.link %}">
+        {% if product.image %}
+        <img src="{{ product.image.url }}">
+        {% else %}
+        <p>Image unavailable</p>
+        {% endif %}
+        <div class="brief-details">
+          <p>{{ product.name }}</p>
+          <p>{{ product.amount }}</p>
+          <p>BDT {{ product.price }}/-</p>
+        </div>
+      </a>
+      <button type="submit" class="btn-primary">Add to Cart</button>
+    </div>
+  </form>
+  {% endif %}
+
+  {% endfor %}
+  {% else %}
+  <p>No products available yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

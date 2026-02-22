@@ -1,0 +1,47 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'shop/style.css' %}">
+    {% block title %}<title>Insaffood</title>{% endblock %}
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <div>
+                <a href="{% url 'home' %}">
+                    <img class="logo" src="{% static 'shop/images/insaf.jpg' %}">
+                </a>
+                <a href="{% url 'cart' %}">
+                    কার্ট (Cart)
+                </a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}">
+                    লগইন (Login)
+                </a>
+                {% else %}
+                <a href="{% url 'logout' %}">
+                    লগআউট (Logout)
+                </a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    <main>
+        <br><br>
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+    <footer>&copy; 2020-{% now "Y" %} Insaffood. All rights reserved by Insaffood.</footer>
+
+</body>
+
+</html>
