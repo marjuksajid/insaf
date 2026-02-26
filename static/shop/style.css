@@ -11,13 +11,20 @@ a {
 }
 
 
-h1,
-footer {
+h1 {
     text-align: center;
 }
 
 
-header nav div {
+.c-right {
+    text-align: center;
+}
+
+footer {
+    
+}
+
+.header {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
@@ -32,13 +39,13 @@ header nav div {
 }
 
 
-header nav div a {
+.header a {
     width: 95px;
     text-align: center;
 }
 
 
-header nav div a:hover {
+.header a:hover {
     background-color: palevioletred;
     color: white;
     border-radius: 15px;
@@ -496,4 +503,20 @@ header nav div a:hover {
     color: #e74c3c;
     font-size: 14px;
     margin-top: 4px;
+}
+
+
+.terms-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.terms-section {
+    margin-bottom: 30px;
+}
+
+.terms-footer {
+    margin-top: 30px;
+    text-align: center;
 }

@@ -11,6 +11,7 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('register/', views.register, name='register'),
     path('<slug:link>/', views.product_detail, name='product_detail'),
+    path('terms/', views.terms, name='terms'),
     # The `name` parameter in the `path` function is used to give a name
     # to the URL pattern. This name can be used to refer to the URL pattern in other parts of your code
     # the `product_detail` view function expects a parameter called `link`, which is captured 

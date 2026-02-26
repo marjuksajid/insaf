@@ -12,9 +12,8 @@
 
 <body>
 
-    <header>
-        <nav>
-            <div>
+
+            <div class="header">
                 <a href="{% url 'home' %}">
                     <img class="logo" src="{% static 'shop/images/insaf.jpg' %}">
                 </a>
@@ -31,8 +30,7 @@
                 </a>
                 {% endif %}
             </div>
-        </nav>
-    </header>
+
     <main>
         <br><br>
 
@@ -40,7 +38,9 @@
 
     </main>
 
-    <footer>&copy; 2020-{% now "Y" %} Insaffood. All rights reserved by Insaffood.</footer>
+    <footer>
+        <div class="c-right">&copy; 2020-{% now "Y" %} Insaffood. All rights reserved by Insaffood.</div>
+    </footer>
 
 </body>
 

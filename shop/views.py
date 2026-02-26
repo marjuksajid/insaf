@@ -140,3 +140,6 @@ def product_detail(request, link):
 # the `link` field will be automatically populated 
 # with a URL-friendly version of the product's name, which can then be used in the URL for the product detail page. 
 # You do not need to manually create or set the link; it will be generated for you when you save the product.
+
+def terms(request):
+    return render(request, 'shop/terms.html')
