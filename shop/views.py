@@ -4,7 +4,12 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import Product, Cart, CartItem
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
+from django.db import transaction
+from .models import Product, Cart, CartItem, OrderItem
+from .forms import OrderForm
 
 def home(request):
     products = Product.objects.all()
@@ -12,16 +17,13 @@ def home(request):
 
 
 def get_or_create_cart(request):
-    """Helper function to get or create cart for user or session"""
-    if request.user.is_authenticated:
-        cart, created = Cart.objects.get_or_create(user=request.user)
-    else:
-        # For anonymous users, use session
-        if not request.session.session_key:
-            request.session.create()
-        session_key = request.session.session_key
-        cart, created = Cart.objects.get_or_create(session_key=session_key)
-    return cart
+    if not request.session.session_key:
+        request.session.create()
+    session_key = request.session.session_key
+    cart = Cart.objects.filter(session_key=session_key, order__isnull=True).first()
+    if cart:
+        return cart
+    return Cart.objects.create(session_key=session_key)
 
 
 def cart(request):
@@ -39,6 +41,7 @@ def cart(request):
     return render(request, 'shop/cart.html', context)
 
 
+@require_POST
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     cart_obj = get_or_create_cart(request)
@@ -54,81 +57,84 @@ def add_to_cart(request, product_id):
         # If item already exists, increase quantity
         cart_item.quantity += 1
         cart_item.save()
-    
-    messages.success(request, f'{product.name} added to cart!')
-    
-    # Redirect back to the previous page or product detail
-    return redirect(request.META.get('HTTP_REFERER', 'home'))
-
-
-def update_cart(request, item_id):
-    if request.method == 'POST':
-        cart_item = get_object_or_404(CartItem, id=item_id)
-        quantity = int(request.POST.get('quantity', 1))
         
-        if quantity > 0:
-            cart_item.quantity = quantity
-            cart_item.save()
-            messages.success(request, 'Cart updated successfully!')
-        else:
-            cart_item.delete()
-            messages.info(request, 'Item removed from cart.')
-    
+    # Redirect back to the previous page or product detail
+    referer = request.META.get("HTTP_REFERER")
+    if referer and url_has_allowed_host_and_scheme(
+        referer, allowed_hosts={request.get_host()}
+    ):
+        return redirect(referer)
+    return redirect(reverse("home"))
+
+
+@require_POST
+def update_cart(request, item_id):
+    cart_obj = get_or_create_cart(request)
+    cart_item = get_object_or_404(CartItem, id=item_id, cart=cart_obj)
+    try:
+        quantity = int(request.POST.get("quantity", 1))
+    except (TypeError, ValueError):
+        messages.error(request, "Please enter a valid quantity.")
+        return redirect("cart")
+
+    if quantity > 0:
+        cart_item.quantity = quantity
+        cart_item.save()
+    else:
+        cart_item.delete()
+
     return redirect('cart')
 
 
+@require_POST
 def remove_from_cart(request, item_id):
-    cart_item = get_object_or_404(CartItem, id=item_id)
-    product_name = cart_item.product.name
+    cart_obj = get_or_create_cart(request)
+    cart_item = get_object_or_404(CartItem, id=item_id, cart=cart_obj)
     cart_item.delete()
-    messages.info(request, f'{product_name} removed from cart.')
     return redirect('cart')
 
-def login(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                auth_login(request, user)
-                messages.success(request, f'Welcome back, {username}!')
-                next_page = request.GET.get('next', 'home')
-                return redirect(next_page)
-        else:
-            messages.error(request, 'Invalid username or password.')
-    else:
-        form = AuthenticationForm()
-    
-    return render(request, 'shop/login.html', {'form': form})
 
-def logout(request):
-    auth_logout(request)
-    messages.info(request, 'You have been logged out successfully.')
-    return redirect('home')
-
-def register(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    
+def checkout(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}! You can now log in.')
-            auth_login(request, user)  # Automatically log in after registration
-            return redirect('home')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = UserCreationForm()
-    
-    return render(request, 'shop/register.html', {'form': form})
+        cart_obj = get_or_create_cart(request)
+        if cart_obj.get_item_count() == 0:
+            messages.error(request, "Your cart is empty. Please add items to checkout.")
+            return redirect('cart')
+
+        form = OrderForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, "All fields are required.")
+            return render(request, "shop/checkout.html", {"form": form})
+
+        cart_items = list(cart_obj.items.select_related('product'))
+        total = sum(item.get_subtotal() for item in cart_items)
+
+        with transaction.atomic():
+            order = form.save(commit=False)
+            order.cart = cart_obj
+            order.total_amount = total
+            order.save()
+
+            order_items = [
+                OrderItem(
+                    order=order,
+                    product=item.product,
+                    product_name=item.product.name,
+                    quantity=item.quantity,
+                    unit_price=item.product.price,
+                    subtotal=item.get_subtotal(),
+                )
+                for item in cart_items
+            ]
+            OrderItem.objects.bulk_create(order_items)
+
+            # Clear the cart after order is placed
+            cart_obj.items.all().delete()
+
+        messages.success(request, "Your order has been placed successfully!")
+        return redirect('home')
+
+    return render(request, 'shop/checkout.html', {"form": OrderForm()})
 
 def product_detail(request, link):
     product = get_object_or_404(Product, link=link)

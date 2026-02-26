@@ -6,13 +6,6 @@
 <div class="cart-container">
     <h2 style="text-align: center;">Your Shopping Cart</h2>
 
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">
-        {{ message }}
-    </div>
-    {% endfor %}
-    {% endif %}
 
     {% if cart_items %}
     <table class="cart-table">
@@ -49,7 +42,10 @@
                 </td>
                 <td>Tk {{ item.get_subtotal }}</td>
                 <td>
-                    <a href="{% url 'remove_from_cart' item.id %}" class="btn-primary">Remove 🗑</a>
+                    <form method="post" action="{% url 'remove_from_cart' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-primary">Remove 🗑</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}
@@ -62,7 +58,7 @@
         <p class="cart-total">Total: Tk {{ total }}</p>
         <div class="cart-actions">
             <a href="{% url 'home' %}" class="btn-primary">Continue Shopping</a>
-            <button class="btn-primary">Proceed to Checkout</button>
+            <a href="{% url 'checkout' %}" class="btn-primary">Proceed to Checkout</a>
         </div>
     </div>
     {% else %}
