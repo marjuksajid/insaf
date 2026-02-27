@@ -134,7 +134,7 @@ def checkout(request):
             cart_obj.items.all().delete()
 
         messages.success(request, "Your order has been placed successfully!")
-        return redirect('home')
+        return redirect('checkout')
 
     return render(request, 'shop/checkout.html', {"form": OrderForm(), "cart_items": cart_items})
 

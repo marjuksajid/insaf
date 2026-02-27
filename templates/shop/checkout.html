@@ -5,7 +5,13 @@
 {% block content %}
 <div class="checkout-container">
     <h2>Place Your Order</h2>
-    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags %}{{ message.tags }}-message{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}    
     {% if cart_items %}
     <form method="post" class="checkout-form">
         {% csrf_token %}
