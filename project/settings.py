@@ -19,7 +19,10 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-
+HONEYBADGER = {
+    'API_KEY': 'hbp_OHnLb9dc2dD301TsnZF0xz26oU6Jmo1pJ8OL',
+    'INSIGHTS_ENABLED': True
+}
 # Application definition
 
 INSTALLED_APPS = [
@@ -33,6 +36,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'honeybadger.contrib.DjangoHoneybadgerMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this
     'django.contrib.sessions.middleware.SessionMiddleware',

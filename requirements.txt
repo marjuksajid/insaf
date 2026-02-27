@@ -11,6 +11,7 @@ Flask-Session
 Flask-SQLAlchemy
 greenlet
 gunicorn
+honeybadger
 itsdangerous
 Jinja2
 MarkupSafe
