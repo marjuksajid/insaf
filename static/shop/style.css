@@ -1,4 +1,6 @@
 body {
+    margin: 0;
+    padding: 0;
     background-color: #f0f8ff;
     color: palevioletred;
     text-shadow: 1px 1px yellowgreen;
@@ -499,8 +501,7 @@ h1 {
 .site-footer {
     background: linear-gradient(135deg, #db7093 0%, #c71585 100%);
     color: white;
-    margin-top: 60px;
-    padding: 40px 20px 0;
+    padding: 40px 0px 0;
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
 }
 
