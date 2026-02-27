@@ -95,8 +95,10 @@ def remove_from_cart(request, item_id):
 
 
 def checkout(request):
+    cart_obj = get_or_create_cart(request)
+    cart_items = cart_obj.items.all()
+    
     if request.method == 'POST':
-        cart_obj = get_or_create_cart(request)
         if cart_obj.get_item_count() == 0:
             messages.error(request, "Your cart is empty. Please add items to checkout.")
             return redirect('cart')
@@ -104,7 +106,7 @@ def checkout(request):
         form = OrderForm(request.POST)
         if not form.is_valid():
             messages.error(request, "All fields are required.")
-            return render(request, "shop/checkout.html", {"form": form})
+            return render(request, "shop/checkout.html", {"form": form, "cart_items": cart_items})
 
         cart_items = list(cart_obj.items.select_related('product'))
         total = sum(item.get_subtotal() for item in cart_items)
@@ -134,7 +136,7 @@ def checkout(request):
         messages.success(request, "Your order has been placed successfully!")
         return redirect('home')
 
-    return render(request, 'shop/checkout.html', {"form": OrderForm()})
+    return render(request, 'shop/checkout.html', {"form": OrderForm(), "cart_items": cart_items})
 
 def product_detail(request, link):
     product = get_object_or_404(Product, link=link)
