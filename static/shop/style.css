@@ -24,6 +24,7 @@ h1 {
 
 
 .header {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-evenly;
@@ -289,6 +290,7 @@ h1 {
 
 /* Cart Styles */
 .cart-container {
+    width: 100%;
     max-width: 1200px;
     margin: 40px auto;
     padding: 20px;
@@ -509,6 +511,7 @@ h1 {
 }
 /* Footer Styles */
 .site-footer {
+    width: 100%;
     background: linear-gradient(135deg, #db7093 0%, #c71585 100%);
     color: white;
     padding: 40px 0px 0;
