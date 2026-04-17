@@ -8,49 +8,51 @@
 
 
     {% if cart_items %}
-    <table class="cart-table">
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Product</th>
-                <th>Amount</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Subtotal</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in cart_items %}
-            <tr>
-                <td>
-                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-product-image">
-                </td>
-                <td>
-                    <a href="{% url 'product_detail' item.product.link %}">
-                        {{ item.product.name }}
-                    </a>
-                </td>
-                <td>{{ item.product.amount }}</td>
-                <td>Tk {{ item.product.price }}</td>
-                <td>
-                    <form method="post" action="{% url 'update_cart' item.id %}" class="quantity-form">
-                        {% csrf_token %}
-                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99">
-                        <button type="submit" class="btn-primary">Update</button>
-                    </form>
-                </td>
-                <td>Tk {{ item.get_subtotal }}</td>
-                <td>
-                    <form method="post" action="{% url 'remove_from_cart' item.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-primary">Remove 🗑</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="cart-table-wrapper">
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Amount</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td data-label="Image">
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-product-image">
+                    </td>
+                    <td data-label="Product">
+                        <a href="{% url 'product_detail' item.product.link %}">
+                            {{ item.product.name }}
+                        </a>
+                    </td>
+                    <td data-label="Amount">{{ item.product.amount }}</td>
+                    <td data-label="Price">Tk {{ item.product.price }}</td>
+                    <td data-label="Quantity">
+                        <form method="post" action="{% url 'update_cart' item.id %}" class="quantity-form">
+                            {% csrf_token %}
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99">
+                            <button type="submit" class="btn-primary">Update</button>
+                        </form>
+                    </td>
+                    <td data-label="Subtotal">Tk {{ item.get_subtotal }}</td>
+                    <td data-label="Action">
+                        <form method="post" action="{% url 'remove_from_cart' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-primary">Remove 🗑</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <div class="cart-summary">
         <h3>Cart Summary</h3>

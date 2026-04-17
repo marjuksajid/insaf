@@ -15,12 +15,12 @@
 
     <div class="product-card">
       <a href="{% url 'product_detail' product.link %}">
-        {% if product.image %}
-        <img src="{{ product.image.url }}">
-        {% else %}
-        <p>Image unavailable</p>
-        {% endif %}
         <div class="brief-details">
+          {% if product.image %}
+          <img src="{{ product.image.url }}">
+          {% else %}
+          <p>Image unavailable</p>
+          {% endif %}
           <p>{{ product.name }}</p>
           <p>{{ product.amount }}</p>
           <p>BDT {{ product.price }}/-</p>
